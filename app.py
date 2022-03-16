@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, User, Categories, Favorite, Match
+from models import db, User, Categories, Favorite, Match, Product
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_bcrypt import Bcrypt
 
@@ -25,7 +25,7 @@ def home():
     return "<h1>Hello Señora Pinchetti </h1>"
 
 
-# PARA CREAR USUARIO
+# PARA CREAR USUARIO, NO BORRAR, NO MODIFICAR
 @app.route("/registro", methods=["POST"])
 def registro():
     name = request.json.get("name")
@@ -35,11 +35,11 @@ def registro():
 
     password_hash = bcrypt.generate_password_hash(password)
 
-    user = User(name=name, surname=surname, email=email, password=password)
-    # user.name = name
-    # user.surname = surname
-    # user.email = email
-    # user.password = password_hash
+    user = User()
+    user.name = name
+    user.surname = surname
+    user.email = email
+    user.password = password_hash
 
     db.session.add(user)
     db.session.commit()
@@ -48,7 +48,7 @@ def registro():
         "msg" : "usuario creado exitosamente"}), 200
 
    
-# Iniciar Sesión
+# Iniciar Sesión, NO BORRAR, NO MODIFICAR
 @app.route("/login", methods=["POST"])
 def login():
     password = request.json.get("password")
@@ -67,11 +67,11 @@ def login():
         else:
              return jsonify({
                 "msg": "Correo o email inválido"
-             }), 
+             }) 
     else:
-            return jsonify({
-                "msg": "Regístrate"
-            })
+        return jsonify({
+            "msg": "Regístrate"
+        })
         
         
 
@@ -103,6 +103,30 @@ def get_profile():
 
 # #FALTA EL DELETE PARA ELIMINAR USUARIO
 
+
+@app.route("/products", methods = ["GET"])
+def get_products():
+    products = Product.query.all()
+    products = list(map(lambda product:   product.serialize(),products))
+
+    return jsonify(products), 200
+
+@app.route("/product/<int:id>", methods = ["PUT", "DELETE"])
+def update_product(id):
+    if request.method == "PUT":
+        product = Product.query.get(id)
+        if product is not None:
+            product.title = request.json.get("title")
+            db.session.commit()
+            return jsonify(product.serialize()), 200
+        else: return jsonify({"msg":"Not found"}), 404
+    else:
+        product = Product.query.get(id)
+        if product is not None:
+            db.session.delete(product)
+            db.session.commit()
+            return jsonify({"msg": "done"})
+        else: return jsonify({"msg":"Not found"}), 404
 
 if __name__ == "__main__":
     app.run(host="localhost",port="5000")

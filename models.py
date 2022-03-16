@@ -10,7 +10,7 @@ class User(db.Model):
     password = db.Column(db.String(80), unique=False, nullable=False)
     
     def _repr_ (self):
-        return '<User %r>' % self.username
+        return '<User %r>' % self.name
 
     def serialize(self):
         return {
@@ -102,3 +102,4 @@ class Product(db.Model):
             "autor":self.autor,
             "editorial": self.editorial
         }
+
