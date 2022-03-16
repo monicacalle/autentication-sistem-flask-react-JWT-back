@@ -35,39 +35,40 @@ def registro():
 
     password_hash = bcrypt.generate_password_hash(password)
 
-    user = User()
-    user.name = name
-    user.surname = surname
-    user.email = email
-    user.password = password_hash
+    user = User(name=name, surname=surname, email=email, password=password)
+    # user.name = name
+    # user.surname = surname
+    # user.email = email
+    # user.password = password_hash
 
     db.session.add(user)
     db.session.commit()
 
-    return jsonify({ "usuario creado exitosamente"}), 200
+    return jsonify({ 
+        "msg" : "usuario creado exitosamente"}), 200
 
    
 # Iniciar Sesión
 @app.route("/login", methods=["POST"])
 def login():
-     password = request.json.get("password")
-     email = request.json.get("email")
+    password = request.json.get("password")
+    email = request.json.get("email")
 
-     user = User.query.filter_by(email=email).first()
+    user = User.query.filter_by(email=email).first()
 
-     if user is not None:
-         if bcrypt.check_password_hash(user.password, password):
+    if user is not None:
+        if bcrypt.check_password_hash(user.password, password):
              access_token = create_access_token(identity=email)
              return jsonify({
                  "access_token": access_token,
                  "user": user.serialize(),
                  "success":True
              }), 200
-         else:
+        else:
              return jsonify({
                 "msg": "Correo o email inválido"
              }), 
-        else:
+    else:
             return jsonify({
                 "msg": "Regístrate"
             })
