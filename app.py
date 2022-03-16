@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, User, Categories, Favorite, Match, Product
+from models import db, User, Categories, Favorite, Match
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_bcrypt import Bcrypt
 
@@ -22,87 +22,85 @@ CORS(app)
 #PARA VER SI LA APP ESTA FUNCIONANDO
 @app.route("/")
 def home():
-    return "<h1>Hello Api </h1>"
+    return "<h1>Hello Señora Pinchetti </h1>"
 
 
-#Iniciar Sesión
+# PARA CREAR USUARIO
+@app.route("/registro", methods=["POST"])
+def registro():
+    name = request.json.get("name")
+    surname = request.json.get("surname")
+    email = request.json.get("email")
+    password = request.json.get("password")
+
+    password_hash = bcrypt.generate_password_hash(password)
+
+    user = User()
+    user.name = name
+    user.surname = surname
+    user.email = email
+    user.password = password_hash
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({ "usuario creado exitosamente"}), 200
+
+   
+# Iniciar Sesión
 @app.route("/login", methods=["POST"])
 def login():
-    password = request.json.get("password")
-    email = request.json.get("email")
+     password = request.json.get("password")
+     email = request.json.get("email")
 
-    user = User.query.filter_by(email=email).first()
+     user = User.query.filter_by(email=email).first()
 
-    if user is not None:
-        if bcrypt.check_password_hash(user.password, password):
-            access_token = create_access_token(identity=email)
-            return jsonify({
-                "access_token": access_token,
-                "user": user.serialize(),
-                "success":True
-            }), 200
+     if user is not None:
+         if bcrypt.check_password_hash(user.password, password):
+             access_token = create_access_token(identity=email)
+             return jsonify({
+                 "access_token": access_token,
+                 "user": user.serialize(),
+                 "success":True
+             }), 200
+         else:
+             return jsonify({
+                "msg": "Correo o email inválido"
+             }), 
         else:
             return jsonify({
-                "msg": "Correo o email inválido"
+                "msg": "Regístrate"
             })
-    else:
-          return jsonify({
-                "msg": "Registrate"
-            })    
-    
+        
+        
 
 
 # OBTENER PERFIL
 @app.route("/get_profile")
 @jwt_required()
 def get_profile():
-    user = User.query.get()
-    return jsonify({
-        "user":user.serialize()
-    })
+     user = User.query.get()
+     return jsonify({
+         "user":user.serialize()
+     })
 
-# PARA CREAR USUARIO
-@app.route("/user", methods = ["POST"])
-def create_user():
-    user = User()
-    user.name = request.json.get("name")
-    user.nickname = request.json.get("nickname")
-    user.email = request.json.get("email")
-    user.password = request.json.get("password")
+# @app.route("/users", methods=["GET"])
+# def get_users():
+#     all_users = User.query.all()
+#     users = list(map(lambda user: user.serialize(), all_users))
 
-    if user.name == "":
-        return jsonify({
-            "msg": "El campo nombre no puede estar vacío"
-        }), 400 
+#     return jsonify(users), 200
 
-    if user.email == "":
-         return jsonify({
-            "msg": "Este campo no puede estar vacío"
-        }), 400 
-    
+# @app.route("/user/<int:id>", methods=["PUT"])
+# def update_user(id):
+#         user = User.query.get(id)
+#         if user is not None:
+#             user.nickname = request.json.get("nickname")
+#             db.session.commit()
+#             return jsonify(user.serialize()), 200
+#         else: return jsonify({"msg": "User not found"}), 404
 
-    db.session.add(user)
-    db.session.commit()
-
-    return jsonify(user.serialize()), 200
-
-@app.route("/users", methods=["GET"])
-def get_users():
-    all_users = User.query.all()
-    users = list(map(lambda user: user.serialize(), all_users))
-
-    return jsonify(users), 200
-
-@app.route("/user/<int:id>", methods=["PUT"])
-def update_user(id):
-        user = User.query.get(id)
-        if user is not None:
-            user.nickname = request.json.get("nickname")
-            db.session.commit()
-            return jsonify(user.serialize()), 200
-        else: return jsonify({"msg": "User not found"}), 404
-
-#FALTA EL DELETE PARA ELIMINAR USUARIO
+# #FALTA EL DELETE PARA ELIMINAR USUARIO
 
 
 if __name__ == "__main__":
