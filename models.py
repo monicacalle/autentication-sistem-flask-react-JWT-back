@@ -8,7 +8,7 @@ class User(db.Model):
     surname = db.Column(db.String(250),nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    
+
     def _repr_ (self):
         return '<User %r>' % self.name
 
@@ -103,3 +103,10 @@ class Product(db.Model):
             "editorial": self.editorial
         }
 
+# Usuario, categorias, favorite, match, Product
+#relacion de usuarios a usuarios, uno a muchos
+#relacion de usuarios a productos (books)
+#relacion de usuario a favoritos
+# productos a match
+# categorias a favoritos
+# 
