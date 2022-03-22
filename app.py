@@ -66,17 +66,14 @@ def login():
              }), 200
         else:
              return jsonify({
-                "msg": "Correo o email inválido"
+                "msg": "Email o contraseña inválida"
              }) 
     else:
         return jsonify({
             "msg": "Regístrate"
         })
         
-        
-
-
-# OBTENER PERFIL
+# RUTA PROTEGIDA, NO TIENE METODO PORQUE ES GET POR DEFECTO
 @app.route("/get_profile")
 @jwt_required()
 def get_profile():
