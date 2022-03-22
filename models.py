@@ -74,7 +74,9 @@ class Favorite(db.Model):
 class Match(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.String(250),nullable=False)
-    book_id = db.Column(db.String(250),nullable=False)
+    book_id_from = db.Column(db.String(250),nullable=False)
+    book_id_to = db.Column(db.String(250),nullable=False)
+    status = db.Column(db.String(250), nullable=False)
 
     def _repr_ (self):
         return '<Match %r>' % self.match
@@ -89,8 +91,10 @@ class Match(db.Model):
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    autor = db.Column(db.String(10), nullable=False)
-    editorial = db.Column(db.String(10), nullable=False)
+    autor = db.Column(db.String(30), nullable=False)
+    editorial = db.Column(db.String(30), nullable=False)
+    review = db.Column(db.String(200), nullable=False)
+    
     
     def _repr_(self):
         return "<Product %r>" % self.title
@@ -100,7 +104,8 @@ class Product(db.Model):
             "id":self.id,
             "title": self.title,
             "autor":self.autor,
-            "editorial": self.editorial
+            "editorial": self.editorial,
+            "review": self.review
         }
 
 # Usuario, categorias, favorite, match, Product
@@ -109,4 +114,3 @@ class Product(db.Model):
 #relacion de usuario a favoritos
 # productos a match
 # categorias a favoritos
-# 
