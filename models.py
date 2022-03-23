@@ -63,7 +63,7 @@ class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     favorite = db.Column(db.String(250))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
-    categories = db.relationship('Categories', secondary='Categories', lazy='subquery',
+    categories = db.relationship('Categories', secondary=Categories, lazy='subquery',
         backref=db.backref('favorites', lazy=True))
    
 
