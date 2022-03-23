@@ -8,8 +8,10 @@ class User(db.Model):
     surname = db.Column(db.String(250),nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(80), unique=False, nullable=False)
-    favorite = db.relationship('Favorite', backref='user', lazy=True)
-    products = db.relationship('Products', backref='user', lazy=True)
+
+#    favorite = db.relationship('Favorite', backref='user', lazy=True)
+#    products = db.relationship('Products', backref='user', lazy=True)
+
 
     def _repr_ (self):
         return '<User %r>' % self.name
@@ -63,8 +65,9 @@ class Favorite(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     favorite = db.Column(db.String(250))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
-    categories = db.relationship('Category', secondary=categories, lazy='subquery',
-        backref=db.backref('favorites', lazy=True))
+
+ #   categories = db.relationship('Category', secondary=categories, lazy='subquery',
+ #       backref=db.backref('favorites', lazy=True))
    
 
     def _repr_ (self):
@@ -83,14 +86,17 @@ class Match(db.Model):
     book_id_from = db.Column(db.String(250),nullable=False)
     book_id_to = db.Column(db.String(250),nullable=False)
     status = db.Column(db.String(250), nullable=False)
-    book_id = db.Column(db.String(250),nullable=False)
-    products = db.relationship('Product', secondary=products, lazy='subquery', backref=db.backref('matches', lazy=True))
+
+#MODIFICAR EL BOOK ID FROM, ELIMINAR FROM Y BOOK ID TO CAMBIARLO POR ID USUARIO SOLICITANTE
+#RELACIONAR 1 POR EL DUEÑO DEL LIBRO Y 2 OTRA POR EL USUARIO INTERESADO
+   # book_id = db.Column(db.String(250),nullable=False)
+   # products = db.relationship('Product', secondary=products, lazy='subquery', backref=db.backref('matches', lazy=True))
 
     def _repr_ (self):
         return '<Match %r>' % self.match
 
     def serialize(self):
-        return {
+        return  {
     "id" : self.id,
     "user_id": self.user_id,
     "book:id": self.book_id
@@ -102,6 +108,7 @@ class Product(db.Model):
     autor = db.Column(db.String(30), nullable=False)
     editorial = db.Column(db.String(30), nullable=False)
     review = db.Column(db.String(200), nullable=False)
+
     
     autor = db.Column(db.String(10), nullable=False)
     editorial = db.Column(db.String(10), nullable=False)
