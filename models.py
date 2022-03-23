@@ -77,12 +77,13 @@ class Match(db.Model):
     book_id_from = db.Column(db.String(250),nullable=False)
     book_id_to = db.Column(db.String(250),nullable=False)
     status = db.Column(db.String(250), nullable=False)
-
+#MODIFICAR EL BOOK ID FROM, ELIMINAR FROM Y BOOK ID TO CAMBIARLO POR ID USUARIO SOLICITANTE
+#RELACIONAR 1 POR EL DUEÑO DEL LIBRO Y 2 OTRA POR EL USUARIO INTERESADO
     def _repr_ (self):
         return '<Match %r>' % self.match
 
     def serialize(self):
-        return {
+        return  {
     "id" : self.id,
     "user_id": self.user_id,
     "book:id": self.book_id
@@ -94,6 +95,7 @@ class Product(db.Model):
     autor = db.Column(db.String(30), nullable=False)
     editorial = db.Column(db.String(30), nullable=False)
     review = db.Column(db.String(200), nullable=False)
+
     
     
     def _repr_(self):
