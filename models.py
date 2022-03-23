@@ -104,10 +104,6 @@ class Product(db.Model):
     autor = db.Column(db.String(30), nullable=False)
     editorial = db.Column(db.String(30), nullable=False)
     review = db.Column(db.String(200), nullable=False)
-
-    
-    autor = db.Column(db.String(10), nullable=False)
-    editorial = db.Column(db.String(10), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'),nullable=False)
 
     

@@ -106,28 +106,54 @@ def update_product(id):
             return jsonify({"msg": "done"})
         else: return jsonify({"msg":"Not found"}), 404
 
+
+@app.route("/product", methods = ["POST"])
+def create_product():
+    product = Product()
+    title = request.json.get("title")
+    autor = request.json.get("autor")
+    editorial = request.json.get("editorial")
+    review = request.json.get("review")
+    user_id = request.json.get("user_id")
+
+    product.title = title
+    product.autor = autor 
+    product.editorial = editorial
+    product.review = review
+    product.user_id = user_id
+
+    if title == "":
+        return jsonify({
+            "msg": "Title cannot be empty"
+        }), 400
+    
+    db.session.add(product)
+    db.session.commit()
+
+    return jsonify(product.serialize()), 200
+
 #PARA CONECTAR LA BASE DE DATOS CON EL FLUX
 
 #@app.route("/bookmatch", methods=["POST"])
-# #def registro():
-#     id = request.json.get("id")
-#     user_id = request.json.get("book_id_from")
-#     book_id_from = request.json.get("book_id_from")
-#     book_id_to = request.json.get("book_id_to")
-#     status = request.json.get(status)
+#def registro():
+    # id = request.json.get("id")
+    # user_id = request.json.get("book_id_from")
+    # book_id_from = request.json.get("book_id_from")
+    # book_id_to = request.json.get("book_id_to")
+    # status = request.json.get(status)
 
-#     user = Match()
-#     user.id = id
-#     user.user_id = user_id
-#     user.book_id_from = book_id_to
-#     user.book_id_to = book_id_to
-#     user.status = status
+    # user = Match()
+    # user.id = id
+    # user.user_id = user_id
+    # user.book_id_from = book_id_to
+    # user.book_id_to = book_id_to
+    # user.status = status
 
-#     db.session.add(user)
-#     db.session.commit()
+    # db.session.add(user)
+    # db.session.commit()
 
-#     return jsonify({ 
-#         "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
+    # return jsonify({ 
+    #     "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
 
 
 
