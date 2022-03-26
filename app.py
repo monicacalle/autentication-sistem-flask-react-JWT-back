@@ -132,30 +132,104 @@ def create_product():
 
     return jsonify(product.serialize()), 200
 
-#PARA CONECTAR LA BASE DE DATOS CON EL FLUX
 
-#@app.route("/bookmatch", methods=["POST"])
-#def registro():
-    # id = request.json.get("id")
-    # user_id = request.json.get("book_id_from")
-    # book_id_from = request.json.get("book_id_from")
-    # book_id_to = request.json.get("book_id_to")
-    # status = request.json.get(status)
+#ENDPOINT PARA PRIMERA POST ACERCA DEL ESTADO PENDING Y SOLICITUD DEL LIBRO
 
-    # user = Match()
-    # user.id = id
-    # user.user_id = user_id
-    # user.book_id_from = book_id_to
-    # user.book_id_to = book_id_to
-    # user.status = status
+@app.route("/bookmatch", methods=["POST"])
+def bookmatch():
+    id = request.json.get("id")
+    user_id = request.json.get("user_id")
+    book = request.json.get("book")
+    interested = request.json.get("interested")
+    status = request.json.get(status)
 
-    # db.session.add(user)
-    # db.session.commit()
+    user = Match()
+    user.id = id
+    user.user_id = user_id
+    user.book = book
+    user.interested = interested
+    user.status = status
 
-    # return jsonify({ 
-    #     "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({ 
+        "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
+
+#ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO
+@app.route("/pendingmatch", methods=["POST"])
+def pendingmatch(): 200
 
 
+#ENDPOINT PARA CONSULTAR LOS MATCH ACEPTADOS
+@app.route("/acceptedmatches", methods=["POST"])
+def acceptedmatches(): 200
+
+#ENDPOINT PARA CONSULTAR TODOS LOS LIBROS PUBLICADOS MENOS LOS MIOS 
+@app.route("/publishedbooks", methods=["POST"])
+def publishedbooks(): 200
+
+
+#ENDPOINT PARA POSTEAR CAMBIO DE STATUS ACEPTADO
+@app.route("/statusaccepted", methods=["POST"])
+def statusaccepted(): 200
+
+#ENDPOINT PARA POSTEAR CAMBIO DE ESTADO RECHAZADO
+@app.route("/statusrejected", methods=["POST"])
+def pstatusrejected(): 200
+
+#CRUD PARA EDITAR PERFIL DE USUARIO 
+#DEJAR AL FINAL
+@app.route("/user", methods=["GET"])
+def get_user():
+    try:
+        all_user = User.query.all()
+        all_user = list(map(lambda user: user.serialize(), all_user))
+    except Exception as error:
+        print(f"User error : {error}")    
+    return jsonify(all_user)
+
+
+@app.route("/user", methods=["POST"])
+def create_user():
+    try: 
+        user = User()
+        body = request.get_json()
+        user.user = body["user"]       
+        db.session.add(user)
+        db.session.commit()
+    except Exception as error:
+        print(f"UserPOST error : {error}")
+    return jsonify({"user": body["user"]})
+
+
+@app.route("/user/<int:id>", methods=["PUT"])
+def update_user(id):
+    if id is not None:
+        user = User.query.get(id)
+        if user is not None:
+            user.id = request.json.get("id")
+            db.session.commit()
+            return jsonify(user.serialize()), 200
+        else:
+            return jsonify({
+                "msg": "Usuario no encontrado"
+            }), 404
+    else:
+        return jsonify({
+            "msg": "Usuario no existe"
+        }), 400
+
+
+@app.route('/user <int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.all(id=user_id).one_or_none()
+    if user is None:
+        return jsonify({"message": "No encontrado"}), 404
+    deleted = user.delete()
+    if deleted == False:
+        return jsonify({"message": "Algo salió mal. Vuelve a intentarlo"}), 500
+    return jsonify([]), 204
 
 if __name__ == "__main__":
     app.run(host="localhost",port="5000")
