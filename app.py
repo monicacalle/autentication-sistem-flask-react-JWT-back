@@ -1,21 +1,23 @@
-import os 
-from flask import Flask, jsonify, request
+import os
+from dotenv import load_dotenv
+from flask import Flask, jsonify, request, session
+import google.auth.transport.requests
+from google.oauth2 import id_token
 from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, User, Categories, Favorite, Match, Product
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_bcrypt import Bcrypt
 
-
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
-
+load_dotenv()
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASEDIR, "app.db")
 app.config["SECRET_KEY"] = "secret-key"
 app.config["JWT_SECRET_KEY"] = "super-secret"
 jwt = JWTManager(app)
 bcrypt = Bcrypt(app)
-Migrate(app, db)
+Migrate(app, db, render_as_batch=True)
 db.init_app(app)
 CORS(app)
 
@@ -33,6 +35,9 @@ def registro():
     email = request.json.get("email")
     password = request.json.get("password")
 
+    if not password or password =="":
+        return jsonify({"msg":"contraseña requerida"})
+
     password_hash = bcrypt.generate_password_hash(password)
 
     user = User()
@@ -45,7 +50,9 @@ def registro():
     db.session.commit()
 
     return jsonify({ 
-        "msg" : "usuario creado exitosamente"}), 200
+        "msg" : "usuario creado exitosamente",
+        "success":True
+        }), 200
 
    
 # Iniciar Sesión, NO BORRAR, NO MODIFICAR
@@ -66,19 +73,22 @@ def login():
              }), 200
         else:
              return jsonify({
-                "msg": "Email o contraseña inválida"
-             }) 
+                "msg": "Email o contraseña inválida",
+                "success":False
+             }),400
     else:
         return jsonify({
-            "msg": "Regístrate"
-        })
+            "msg": "Regístrate",
+            "success":False
+        }),404
         
 # RUTA PROTEGIDA, NO TIENE METODO PORQUE ES GET POR DEFECTO
 @app.route("/get_profile")
 @jwt_required()
 def get_profile():
-     user = User.query.get()
-     return jsonify({
+    email=get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    return jsonify({
          "user":user.serialize()
      })
 
@@ -132,6 +142,47 @@ def create_product():
 
     return jsonify(product.serialize()), 200
 
+@app.route("/auth/google", methods=["POST"])
+def authGoogle():
+    token_request = google.auth.transport.requests.Request(session=session)
+    token = request.json.get("token")
+    id_info = id_token.verify_oauth2_token(
+        id_token=token,
+        audience=os.environ["GOOGLE_CLIENT_ID"],
+        clock_skew_in_seconds=10,
+        request=token_request,
+    )
+
+    email = id_info.get("email")
+    name = id_info.get("given_name")
+    surname = id_info.get("family_name")
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        user = User()
+        user.name = name
+        user.surname = surname
+        user.email = email
+        db.session.add(user)
+        db.session.commit()
+
+    access_token = create_access_token(identity=email)
+    return jsonify({
+                 "access_token": access_token,
+                 "user": user.serialize(),
+                 "success":True
+             }), 200
+    
+    
+@app.route("/logout")
+def logout():
+    session.clear()
+    return jsonify({
+        "msg": "logout"
+    })
+
+
+
+#PARA CONECTAR LA BASE DE DATOS CON EL FLUX
 
 #ENDPOINT PARA PRIMERA POST ACERCA DEL ESTADO PENDING Y SOLICITUD DEL LIBRO
 
@@ -230,6 +281,7 @@ def delete_user(user_id):
     if deleted == False:
         return jsonify({"message": "Algo salió mal. Vuelve a intentarlo"}), 500
     return jsonify([]), 204
+
 
 if __name__ == "__main__":
     app.run(host="localhost",port="5000")

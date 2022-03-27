@@ -7,7 +7,7 @@ class User(db.Model):
     name = db.Column(db.String(250),nullable=False)
     surname = db.Column(db.String(250),nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(80), unique=False, nullable=False)
+    password = db.Column(db.String(80), unique=False, nullable=True)
 #   favorite = db.relationship('Favorite', backref='user', lazy=True)
 #   products = db.relationship('Products', backref='user', lazy=True)
 
@@ -55,7 +55,7 @@ class Categories(db.Model):
 #             "name": self.name,
 #             "size": self.size,
 #             "description": self.description,
-#             "categories": self.categories,
+#             "Categories": self.categories,
 #             "user.id": self.user_id,
 #        }
     
