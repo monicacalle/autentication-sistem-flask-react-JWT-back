@@ -50,7 +50,9 @@ def registro():
     db.session.commit()
 
     return jsonify({ 
-        "msg" : "usuario creado exitosamente"}), 200
+        "msg" : "usuario creado exitosamente",
+        "success":True
+        }), 200
 
    
 # Iniciar Sesión, NO BORRAR, NO MODIFICAR
@@ -71,19 +73,22 @@ def login():
              }), 200
         else:
              return jsonify({
-                "msg": "Email o contraseña inválida"
-             }) 
+                "msg": "Email o contraseña inválida",
+                "success":False
+             }),400
     else:
         return jsonify({
-            "msg": "Regístrate"
-        })
+            "msg": "Regístrate",
+            "success":False
+        }),404
         
 # RUTA PROTEGIDA, NO TIENE METODO PORQUE ES GET POR DEFECTO
 @app.route("/get_profile")
 @jwt_required()
 def get_profile():
-     user = User.query.get()
-     return jsonify({
+    email=get_jwt_identity()
+    user = User.query.filter_by(email=email).first()
+    return jsonify({
          "user":user.serialize()
      })
 
