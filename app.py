@@ -152,23 +152,21 @@ def authGoogle():
     name = id_info.get("given_name")
     surname = id_info.get("family_name")
     user = User.query.filter_by(email=email).first()
-    if user is not None:
-        access_token = create_access_token(identity=email)
-        return jsonify({
-                 "access_token": access_token,
-                 "user": user.serialize(),
-                 "success":True
-             }), 200
-    else:
+    if user is None:
         user = User()
         user.name = name
         user.surname = surname
         user.email = email
         db.session.add(user)
         db.session.commit()
-        return jsonify({ 
-        "msg" : "usuario creado exitosamente"}), 200
- 
+
+    access_token = create_access_token(identity=email)
+    return jsonify({
+                 "access_token": access_token,
+                 "user": user.serialize(),
+                 "success":True
+             }), 200
+    
     
 @app.route("/logout")
 def logout():
