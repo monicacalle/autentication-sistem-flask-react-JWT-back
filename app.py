@@ -36,7 +36,7 @@ def registro():
     password = request.json.get("password")
 
     if not password or password =="":
-        return jsonify({"msg":"password is required"})
+        return jsonify({"msg":"contraseña requerida"})
 
     password_hash = bcrypt.generate_password_hash(password)
 
