@@ -1,14 +1,16 @@
-import os 
-from flask import Flask, jsonify, request
+import os
+from dotenv import load_dotenv
+from flask import Flask, jsonify, request, session
+import google.auth.transport.requests
+from google.oauth2 import id_token
 from flask_cors import CORS
 from flask_migrate import Migrate
 from models import db, User, Categories, Favorite, Match, Product
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_bcrypt import Bcrypt
 
-
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
-
+load_dotenv()
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(BASEDIR, "app.db")
 app.config["SECRET_KEY"] = "secret-key"
@@ -132,6 +134,36 @@ def create_product():
 
     return jsonify(product.serialize()), 200
 
+@app.route("/auth/google", methods=["POST"])
+def authGoogle():
+    token_request = google.auth.transport.requests.Request(session=session)
+    token = request.json.get("token")
+    id_info = id_token.verify_oauth2_token(
+        id_token=token,
+        audience=os.environ["GOOGLE_CLIENT_ID"],
+        clock_skew_in_seconds=10,
+        request=token_request,
+    )
+    print(id_info)
+    print (type(id_info))
+
+    email = id_info.get("email")
+    # user = User.query.filter_by(email=email).first()
+    # print(user)
+ 
+    return jsonify({
+                "msg": id_info
+             }) 
+    
+@app.route("/logout")
+def logout():
+    session.clear()
+    return jsonify({
+        "msg": "logout"
+    })
+
+
+
 #PARA CONECTAR LA BASE DE DATOS CON EL FLUX
 
 #@app.route("/bookmatch", methods=["POST"])
@@ -154,6 +186,7 @@ def create_product():
 
     # return jsonify({ 
     #     "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
+
 
 
 

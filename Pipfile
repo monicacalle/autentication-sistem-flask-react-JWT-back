@@ -11,6 +11,8 @@ cors = "*"
 flask-jwt-extended = "*"
 flask-bcrypt = "*"
 flask-cors = "*"
+google-auth = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
