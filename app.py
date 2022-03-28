@@ -26,8 +26,8 @@ CORS(app)
 def home():
     return "<h1>Hello Señora Pinchetti </h1>"
 
-
-# PARA CREAR USUARIO, NO BORRAR, NO MODIFICAR
+#ESTOS 4 ENDPOINT SON LOS DEL CRUD DEL USUARIO
+# PARA CREAR USUARIO, NO BORRAR, NO MODIFICAR #PARA POSTEAR USUARIO
 @app.route("/registro", methods=["POST"])
 def registro():
     name = request.json.get("name")
@@ -53,6 +53,49 @@ def registro():
         "msg" : "usuario creado exitosamente",
         "success":True
         }), 200
+
+#ENDPOINT PARA VER TODOS LOS USUARIOS
+@app.route("/editdata", methods=["GET"])
+def get_users():
+     try:
+         all_users = User.query.all()
+         all_users = list(map(lambda editdata: user.serialize(), all_editdata))
+     except Exception as error:
+         print("Editar error : {error}")    
+     return jsonify(all_users)
+
+#ENDPOINT PARA EDITAR USUARIOS
+#LISTO, FUNCIONANDO
+@app.route("/registro/<int:id>", methods=["PUT"])
+def update_user(id):
+    if id is not None:
+        user = User.query.get(id)
+        if user is not None:
+            user.name = request.json.get("name")
+            user.surname = request.json.get("surname")
+            user.password = request.json.get("password")
+            db.session.commit()
+            return jsonify(user.serialize()), 200
+        else:
+            return jsonify({
+                "msg": "Usuario no encontrado"
+            }), 404
+    else:
+        return jsonify({
+            "msg": "Usuario no existe"
+        }), 400
+
+#ENDPOINT PARA ELIMINAR USUARIO
+# FUNCIONANDO
+@app.route("/registro/<int:id>", methods=['DELETE'])
+def delete_user(id):
+    user = User.query.get(id)
+    if user is not None:
+        db.session.delete(user)
+        db.session.commit()
+        return jsonify({"msg" : "success"})
+    else:
+        return jsonify({"msg" : "User not found"}), 404
 
    
 # Iniciar Sesión, NO BORRAR, NO MODIFICAR
@@ -98,6 +141,17 @@ def get_products():
     products = list(map(lambda product:   product.serialize(),products))
 
     return jsonify(products), 200
+
+
+# para consultar por un libro en especial mediante ID #NOBORRAR
+@app.route("/product/<int:id>", methods = ["GET"])
+def get_product(id):
+    product = Product.query.filter_by(id=id).first()
+    return jsonify(
+        product.serialize()
+    )
+        
+    
 
 @app.route("/product/<int:id>", methods = ["PUT", "DELETE"])
 def update_product(id):
@@ -184,7 +238,7 @@ def logout():
 
 #PARA CONECTAR LA BASE DE DATOS CON EL FLUX
 
-#ENDPOINT PARA PRIMERA POST ACERCA DEL ESTADO PENDING Y SOLICITUD DEL LIBRO
+#ENDPOINT PARA PRIMER POST ACERCA DEL ESTADO PENDING Y SOLICITUD DEL LIBRO
 
 @app.route("/bookmatch", methods=["POST"])
 def bookmatch():
@@ -192,7 +246,7 @@ def bookmatch():
     user_id = request.json.get("user_id")
     book = request.json.get("book")
     interested = request.json.get("interested")
-    status = request.json.get(status)
+    status = request.json.get("status")
 
     user = Match()
     user.id = id
@@ -207,9 +261,13 @@ def bookmatch():
     return jsonify({ 
         "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
 
-#ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO
+#ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO solo los productos con status pendiente
 @app.route("/pendingmatch", methods=["POST"])
-def pendingmatch(): 200
+def pendingmatch(): 
+    
+    
+    200
+
 
 
 #ENDPOINT PARA CONSULTAR LOS MATCH ACEPTADOS
@@ -217,9 +275,27 @@ def pendingmatch(): 200
 def acceptedmatches(): 200
 
 #ENDPOINT PARA CONSULTAR TODOS LOS LIBROS PUBLICADOS MENOS LOS MIOS 
-@app.route("/publishedbooks", methods=["POST"])
-def publishedbooks(): 200
+@app.route("/publishedproduct", methods=["POST"])
+def publishedbooks(): 
 
+    user = User.query.filter_by(email=email).first()
+
+    if user is not None:
+        if bcrypt.check_password_hash(user.password, password):
+             access_token = create_access_token(identity=email)
+             return jsonify({
+                 "access_token": access_token,
+                 "user": user.serialize(),
+                 "success":True
+             }), 200
+        else:
+             return jsonify({
+                "msg": "Email o contraseña inválida"
+             }) 
+    else:
+        return jsonify({
+            "msg": "Regístrate"
+        })
 
 #ENDPOINT PARA POSTEAR CAMBIO DE STATUS ACEPTADO
 @app.route("/statusaccepted", methods=["POST"])
@@ -229,58 +305,6 @@ def statusaccepted(): 200
 @app.route("/statusrejected", methods=["POST"])
 def pstatusrejected(): 200
 
-#CRUD PARA EDITAR PERFIL DE USUARIO 
-#DEJAR AL FINAL
-@app.route("/user", methods=["GET"])
-def get_user():
-    try:
-        all_user = User.query.all()
-        all_user = list(map(lambda user: user.serialize(), all_user))
-    except Exception as error:
-        print(f"User error : {error}")    
-    return jsonify(all_user)
-
-
-@app.route("/user", methods=["POST"])
-def create_user():
-    try: 
-        user = User()
-        body = request.get_json()
-        user.user = body["user"]       
-        db.session.add(user)
-        db.session.commit()
-    except Exception as error:
-        print(f"UserPOST error : {error}")
-    return jsonify({"user": body["user"]})
-
-
-@app.route("/user/<int:id>", methods=["PUT"])
-def update_user(id):
-    if id is not None:
-        user = User.query.get(id)
-        if user is not None:
-            user.id = request.json.get("id")
-            db.session.commit()
-            return jsonify(user.serialize()), 200
-        else:
-            return jsonify({
-                "msg": "Usuario no encontrado"
-            }), 404
-    else:
-        return jsonify({
-            "msg": "Usuario no existe"
-        }), 400
-
-
-@app.route('/user <int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    user = User.query.all(id=user_id).one_or_none()
-    if user is None:
-        return jsonify({"message": "No encontrado"}), 404
-    deleted = user.delete()
-    if deleted == False:
-        return jsonify({"message": "Algo salió mal. Vuelve a intentarlo"}), 500
-    return jsonify([]), 204
 
 
 if __name__ == "__main__":
