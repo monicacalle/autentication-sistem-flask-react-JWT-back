@@ -140,8 +140,7 @@ def get_product(id):
     return jsonify(
         product.serialize()
     )
-        
-    
+            
 
 @app.route("/product/<int:id>", methods = ["PUT", "DELETE"])
 def update_product(id):
@@ -211,47 +210,33 @@ def bookmatch():
         "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
 
 #ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO solo los productos con status pendiente
-@app.route("/pendingmatch", methods=["POST"])
-def pendingmatch(): 
+@app.route("/pendingmatch", methods=["GET"])
+def pendingmatch():   
+        matching = Match.query.filter_by(status=pending).first()
+        return jsonify(
+                Match.serialize())
+
+
     
-    
-    200
-
-
-
 #ENDPOINT PARA CONSULTAR LOS MATCH ACEPTADOS
-@app.route("/acceptedmatches", methods=["POST"])
-def acceptedmatches(): 200
-
+@app.route("/acceptedmatches", methods=["GET"])
+def acceptedmatches():      
+        acceptedmatch = Match.query.filter_by(status=accepted).first()
+        return jsonify(
+        Match.serialize()
+    )
 #ENDPOINT PARA CONSULTAR TODOS LOS LIBROS PUBLICADOS MENOS LOS MIOS 
-@app.route("/publishedproduct", methods=["POST"])
+@app.route("/publishedproduct", methods=["GET"])
 def publishedbooks(): 
 
-    user = User.query.filter_by(email=email).first()
-
-    if user is not None:
-        if bcrypt.check_password_hash(user.password, password):
-             access_token = create_access_token(identity=email)
-             return jsonify({
-                 "access_token": access_token,
-                 "user": user.serialize(),
-                 "success":True
-             }), 200
-        else:
-             return jsonify({
-                "msg": "Email o contraseña inválida"
-             }) 
-    else:
-        return jsonify({
-            "msg": "Regístrate"
-        })
+    200
 
 #ENDPOINT PARA POSTEAR CAMBIO DE STATUS ACEPTADO
-@app.route("/statusaccepted", methods=["POST"])
+@app.route("/statusaccepted", methods=["PUT"])
 def statusaccepted(): 200
 
 #ENDPOINT PARA POSTEAR CAMBIO DE ESTADO RECHAZADO
-@app.route("/statusrejected", methods=["POST"])
+@app.route("/statusrejected", methods=["PUT"])
 def pstatusrejected(): 200
 
 
