@@ -66,14 +66,15 @@ def get_users():
 
 #ENDPOINT PARA EDITAR USUARIOS
 #LISTO, FUNCIONANDO
-@app.route("/registro/<int:id>", methods=["PUT"])
+@app.route("/edituser/<int:id>", methods=["PUT"])
 def update_user(id):
     if id is not None:
-        user = User.query.get(id)
+        user = User.query.filter_by(id=id).first()
         if user is not None:
             user.name = request.json.get("name")
             user.surname = request.json.get("surname")
-            user.password = request.json.get("password")
+            user.password = bcrypt.generate_password_hash(request.json.get("password"))
+
             db.session.commit()
             return jsonify(user.serialize()), 200
         else:
@@ -241,14 +242,12 @@ def logout():
 
 @app.route("/bookmatch", methods=["POST"])
 def bookmatch():
-    id = request.json.get("id")
     user_id = request.json.get("user_id")
     book = request.json.get("book")
     interested = request.json.get("interested")
     status = request.json.get("status")
 
     user = Match()
-    user.id = id
     user.user_id = user_id
     user.book = book
     user.interested = interested
@@ -263,9 +262,10 @@ def bookmatch():
 #ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO solo los productos con status pendiente
 @app.route("/pendingmatch", methods=["GET"])
 def pendingmatch():   
-        matching = Match.query.filter_by(status=pending).first()
+        matching = Match.query.all()
+        matching = list(map(lambda allmatching: allmatching.serialize(), matching))
         return jsonify(
-                Match.serialize())
+                matching)
 
 
     
