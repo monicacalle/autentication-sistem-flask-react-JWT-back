@@ -92,7 +92,7 @@ class Match(db.Model):
         return  {
     "id" : self.id,
     "user_id": self.user_id,
-    "book": self.book,
+    "book:": self.book,
     "interested" : self.interested,
     "status" : self.status
         }
