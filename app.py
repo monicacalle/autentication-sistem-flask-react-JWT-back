@@ -90,8 +90,8 @@ def update_user(id):
 # FUNCIONANDO
 @app.route("/registro/<int:id>", methods=['DELETE'])
 def delete_user(id):
-    user = User.query.get(id)
-    if user is not None:
+    if id is not None:
+        user = User.query.filter_by(id=id).first()
         db.session.delete(user)
         db.session.commit()
         return jsonify({"msg" : "success"})
