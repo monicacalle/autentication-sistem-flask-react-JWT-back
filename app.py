@@ -143,7 +143,6 @@ def get_products():
 
     return jsonify(products), 200
 
-
 # para consultar por un libro en especial mediante ID #NOBORRAR
 @app.route("/product/<int:id>", methods = ["GET"])
 def get_product(id):
@@ -151,7 +150,15 @@ def get_product(id):
     return jsonify(
         product.serialize()
     )
-            
+# para consultar por los libros publicados por el usuario, SOLO el usuario filtrado por ID
+@app.route("/userproducts/<int:id>", methods = ["GET"])
+def get_mybooks(id):
+    products = Product.query.filter_by(user_id=id).all()
+    products = list(map(lambda product: product.serialize(),products))
+    return jsonify(
+        products
+    )
+
 
 @app.route("/product/<int:id>", methods = ["PUT", "DELETE"])
 def update_product(id):
@@ -234,8 +241,6 @@ def logout():
         "msg": "logout"
     })
 
-
-
 #PARA CONECTAR LA BASE DE DATOS CON EL FLUX
 
 #ENDPOINT PARA PRIMER POST ACERCA DEL ESTADO PENDING Y SOLICITUD DEL LIBRO
@@ -259,8 +264,20 @@ def bookmatch():
     return jsonify({ 
         "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
 
+#ELIMINAR SOLICITUDES DE BOOKMATCH
+
+@app.route("/bookmatch/<int:id>", methods=['DELETE'])
+def delete_bookmatch(id):
+    if id is not None:
+        match = Match.query.filter_by(id=id).first()
+        db.session.delete(match)
+        db.session.commit()
+        return jsonify({"msg" : "success"})
+    else:
+        return jsonify({"msg" : "Request not found"}), 404
+
 #ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO solo los productos con status pendiente
-@app.route("/pendingmatch", methods=["GET"])
+@app.route("/pendingreceive", methods=["GET"])
 def pendingmatch():   
         matching = Match.query.all()
         matching = list(map(lambda allmatching: allmatching.serialize(), matching))
