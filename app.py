@@ -278,7 +278,7 @@ def delete_bookmatch(id):
 
 #ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO solo los productos con status pendiente
 @app.route("/pendingreceive", methods=["GET"])
-def pendingmatch():   
+def pendingreceive():   
         matching = Match.query.all()
         matching = list(map(lambda allmatching: allmatching.serialize(), matching))
         return jsonify(
@@ -287,9 +287,9 @@ def pendingmatch():
 
     
 #ENDPOINT PARA CONSULTAR LOS MATCH ACEPTADOS
-@app.route("/acceptedmatches", methods=["GET"])
-def acceptedmatches():      
-        acceptedmatch = Match.query.filter_by(status=accepted).first()
+@app.route("/pendingsend", methods=["GET"])
+def pendingsend():      
+        pendingsend = Match.query.filter_by(status=accepted).first()
         return jsonify(
         Match.serialize()
     )
