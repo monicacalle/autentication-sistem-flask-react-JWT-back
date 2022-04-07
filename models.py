@@ -115,7 +115,8 @@ class Product(db.Model):
             "title": self.title,
             "autor":self.autor,
             "editorial": self.editorial,
-            "review": self.review 
+            "review": self.review,
+            "user_id": self.user_id 
         }
 
 # Usuario, categorias, favorite, match, Product
