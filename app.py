@@ -284,6 +284,21 @@ def bookmatch():
     status = request.json.get("status")
     book_id = request.json.get("book_id")
 
+    
+    existingMatches = Match.query.filter_by(user_id=user_id).all()
+    matches = 0
+    for match in existingMatches:
+        if match.interested == interested and match.book == book:
+            matches = matches+1
+            print(match.serialize())
+            break
+
+    print(matches)
+    if matches >0:
+        return jsonify({
+            "msg": "ya exite una solicitud para este libro"
+        }), 400
+
     user = Match()
     user.user_id = user_id
     user.book = book
