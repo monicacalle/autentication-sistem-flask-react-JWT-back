@@ -53,6 +53,14 @@ def registro():
         "msg" : "usuario creado exitosamente",
         "success":True
         }), 200
+#para enviar libros por ID
+
+@app.route("/getbook/<int:id>", methods=["GET"])
+def get_book(id):
+    product = Product.query.filter_by(id=id).first()
+    if product is not None:
+        return jsonify(product.serialize()) 
+
 
 #ENDPOINT PARA VER TODOS LOS USUARIOS
 @app.route("/editdata", methods=["GET"])
@@ -251,18 +259,33 @@ def bookmatch():
     book = request.json.get("book")
     interested = request.json.get("interested")
     status = request.json.get("status")
+    book_id = request.json.get("book_id")
 
     user = Match()
     user.user_id = user_id
     user.book = book
     user.interested = interested
     user.status = status
+    user.book_id = book_id
 
     db.session.add(user)
     db.session.commit()
 
     return jsonify({ 
         "msg" : "BookMatch ha enviado tu solicitud correctamente, buena suerte"}), 200
+
+#CAMBIO DE ESTADO A ACCEPTED EN MATCH
+
+app.route("/match/<int:id>", methods=["PUT"])
+def matchaccepted(id):
+    match = Match.query.filter_by(id=id).first()
+    if match is not None:
+        match.status = request.json.get("status")
+
+    db.session.commit()
+
+    return jsonify({ 
+        "msg" : "Felicitaciones haz aceptado el Match"}), 200
 
 #ELIMINAR SOLICITUDES DE BOOKMATCH
 
@@ -277,12 +300,34 @@ def delete_bookmatch(id):
         return jsonify({"msg" : "Request not found"}), 404
 
 #ENDPOINT PARA CONSULTAR LOS MATCH PENDIENTES AQUI DEBERIA EXISTIR UN FILTRO solo los productos con status pendiente
-@app.route("/pendingreceive", methods=["GET"])
-def pendingreceive():   
+@app.route("/pendingreceive", methods=['GET'])
+def pendingreceive():
         matching = Match.query.all()
         matching = list(map(lambda allmatching: allmatching.serialize(), matching))
         return jsonify(
                 matching)
+    
+
+# @app.route("/pendingreceive/<int:id>", methods=['PUT'])
+# def pendingreceive():
+#         user_id = request.json.get("user_id")
+#         book = request.json.get("book")
+#         interested = request.json.get("interested")
+#         status = request.json.get("status")
+
+#         user = Match()
+#         user.user_id = user_id
+#         user.book = book
+#         user.interested = interested
+#         user.status = status
+
+#         db.session.add(user)
+#         db.session.commit()
+
+#         return jsonify({ 
+#         "msg" : "Felicitaciones haz aceptado el Match"}), 200
+
+
 
 
     

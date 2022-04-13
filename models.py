@@ -83,6 +83,7 @@ class Match(db.Model):
     book = db.Column(db.String(250),nullable=False)
     interested = db.Column(db.String(250),nullable=False)
     status = db.Column(db.String(15), nullable=False)
+    book_id = db.Column(db.String(15), nullable=False)
 
 
     def _repr_ (self):
@@ -94,7 +95,8 @@ class Match(db.Model):
     "user_id": self.user_id,
     "book": self.book,
     "interested" : self.interested,
-    "status" : self.status
+    "status" : self.status,
+    "book_id" : self.book_id
         }
 
 class Product(db.Model):
