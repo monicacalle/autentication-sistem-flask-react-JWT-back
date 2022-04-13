@@ -35,10 +35,32 @@ def registro():
     email = request.json.get("email")
     password = request.json.get("password")
 
-    if not password or password =="":
-        return jsonify({"msg":"contraseña requerida"})
+    print(password)
 
-    password_hash = bcrypt.generate_password_hash(password)
+# AUTENTICACION CONTRASENA
+    if not password or password == " ":
+        return jsonify({
+            "msg" : "contraseña requerida", "success": False
+        }),400
+
+    is_valid = True    
+    if len(password) <= 8 or len(password) >= 16:
+        is_valid = False
+        print("lenght")
+    if not any(char.isdigit() for char in password):        
+        is_valid = False       
+        print("vegy")
+    if not any(char.isupper() for char in password):       
+        is_valid = False   
+        print("upper")
+    if not any(char.islower() for char in password):      
+        is_valid = False
+        print("lower")
+    if not is_valid:      
+        return jsonify({"msg":"la contraseña debe contener almenos de 8 a 16 caracteres, debe incluir numeros y mayusculas y minusculas ", "success": False}), 400
+                
+
+    password_hash = bcrypt.generate_password_hash(password) 
 
     user = User()
     user.name = name
@@ -46,9 +68,10 @@ def registro():
     user.email = email
     user.password = password_hash
 
+    
     db.session.add(user)
     db.session.commit()
-
+            
     return jsonify({ 
         "msg" : "usuario creado exitosamente",
         "success":True
